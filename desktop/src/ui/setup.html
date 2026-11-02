@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dokumen Kegiatan – Sambungan Google</title>
+<style>
+:root{--paper:#EAF5FD;--surface:#fff;--ink:#12263A;--muted:#4F6B84;--line:#C9E1F3;--stamp:#1A6FAF;--stamp-soft:#D6ECFA;--ok:#1E7A4C;--ok-soft:#E3F3EA;--warn:#9A5800;--warn-soft:#FBF0DE;--danger:#B3261E;--danger-soft:#FBE7E5}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.55 "Segoe UI",system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px}
+.card{width:min(560px,100%);background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px 28px 24px;box-shadow:0 1px 2px rgba(18,52,86,.06),0 8px 24px rgba(18,52,86,.09)}
+.brand{display:flex;gap:12px;align-items:center;margin-bottom:20px}
+.seal{width:40px;height:40px;border-radius:50%;border:2px solid var(--stamp);display:grid;place-items:center;color:var(--stamp);font:700 14px Georgia,serif;flex:none}
+h1{font:600 21px Georgia,serif;margin:0}
+.brand small{display:block;color:var(--muted);font-size:12.5px}
+h2{font:600 16px Georgia,serif;margin:0 0 4px}
+.step{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:12px;display:grid;grid-template-columns:28px 1fr;gap:10px}
+.num{width:26px;height:26px;border-radius:50%;background:var(--stamp-soft);color:var(--stamp);display:grid;place-items:center;font-weight:700;font-size:13px}
+.step.done .num{background:var(--ok);color:#fff}
+.step p{margin:0 0 10px;color:var(--muted);font-size:13px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;cursor:pointer;font:500 14px inherit;color:var(--ink)}
+.btn.primary{background:var(--stamp);border-color:var(--stamp);color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.msg{margin-top:14px;padding:10px 12px;border-radius:10px;font-size:13px}
+.msg.err{background:var(--danger-soft);color:var(--danger)}.msg.warn{background:var(--warn-soft);color:var(--warn)}.msg.ok{background:var(--ok-soft);color:var(--ok)}
+.mono{font-family:Consolas,monospace;font-size:12.5px}
+.foot{margin-top:18px;font-size:12px;color:var(--muted);text-align:center}
+.go{margin-top:18px;width:100%;padding:11px;font-size:15px}
+</style></head>
+<body>
+<div class="card">
+  <div class="brand"><div class="seal">DK</div><div><h1>Dokumen Kegiatan</h1><small>S2 Magister Manajemen · FEB Universitas Negeri Jakarta</small></div></div>
+  <h2>Sambungan Google</h2>
+  <p style="margin:0;color:var(--muted)">Semua data, berkas, dan email aplikasi memakai akun Google Prodi <b class="mono" id="exp">mm.febunj@gmail.com</b>. Langkah ini dilakukan sekali di setiap komputer.</p>
+  <div class="step" id="s1"><div class="num">1</div><div>
+    <b>Pasang kredensial Google</b>
+    <p>Pilih berkas JSON “OAuth client (Desktop app)” yang dibuat di Google Cloud. Berkas yang sama dipakai di semua komputer.</p>
+    <div class="row"><button class="btn" id="pick">Pilih berkas kredensial…</button><span class="mono" id="cid"></span></div></div></div>
+  <div class="step" id="s2"><div class="num">2</div><div>
+    <b>Masuk ke Google</b>
+    <p>Browser akan terbuka. Masuk dengan akun <b class="mono">mm.febunj@gmail.com</b>, lalu izinkan aplikasi mengelola berkasnya di Drive dan mengirim email.</p>
+    <div class="row"><button class="btn primary" id="signin">Masuk dengan Google</button><button class="btn" id="signout" hidden>Keluar dari Google</button><span id="email" class="mono"></span></div></div></div>
+  <div id="msg"></div>
+  <button class="btn primary go" id="go" hidden>Buka aplikasi</button>
+  <div class="foot">Dibuat oleh <b>Koorprodi Dr. Osly Usman, M.BusSyst</b> · <span id="ver"></span></div>
+</div>
+<script>
+const $ = s => document.querySelector(s), D = window.desktop;
+const say = (t, cls = 'err') => { $('#msg').innerHTML = t ? `<div class="msg ${cls}">${t}</div>` : ''; };
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let st = {};
+function paint() {
+  $('#exp').textContent = st.expected; $('#ver').textContent = 'versi ' + st.version;
+  $('#s1').classList.toggle('done', st.hasCred); $('#cid').textContent = st.hasCred ? 'Terpasang · ' + st.clientId.slice(0, 18) + '…' : '';
+  $('#s2').classList.toggle('done', st.signedIn);
+  $('#signin').disabled = !st.hasCred; $('#signin').textContent = st.signedIn ? 'Masuk ulang' : 'Masuk dengan Google';
+  $('#signout').hidden = !st.signedIn; $('#email').textContent = st.signedIn ? st.email : '';
+  $('#go').hidden = !st.signedIn;
+  if (st.signedIn && st.email && st.email.toLowerCase() !== st.expected) say(`Anda masuk dengan <b>${esc(st.email)}</b>, bukan ${esc(st.expected)}. Data aplikasi di akun ini terpisah dari komputer lain. Klik <b>Keluar dari Google</b> lalu masuk dengan ${esc(st.expected)} bila ingin memakai data bersama.`, 'warn');
+}
+async function load() {
+  st = await D.call('g:status'); paint();
+  if (st.signedIn && !new URLSearchParams(location.search).has('ubah')) location.href = 'index.html';
+}
+$('#pick').onclick = async () => { say(''); try { st = await D.call('g:pickCred'); paint(); if (st.hasCred) say('Kredensial terpasang. Lanjutkan ke langkah 2.', 'ok'); } catch (e) { say(esc(e.message)); } };
+$('#signin').onclick = async () => {
+  say('Menunggu Anda masuk di browser… Selesaikan di browser, lalu kembali ke sini.', 'ok'); $('#signin').disabled = true;
+  try { st = await D.call('g:signIn'); paint(); if (st.email?.toLowerCase() === st.expected) say(`Tersambung dengan <b>${esc(st.email)}</b>.`, 'ok'); }
+  catch (e) { say(e.code === 'declined' ? 'Masuk dibatalkan.' : esc(e.message)); paint(); }
+};
+$('#signout').onclick = async () => { st = await D.call('g:signOut'); paint(); say('Sudah keluar dari Google di komputer ini.', 'ok'); };
+$('#go').onclick = () => { location.href = 'index.html'; };
+load();
+</script>
+</body></html>

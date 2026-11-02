@@ -1,0 +1,52 @@
+{
+  "name": "dokumen-kegiatan",
+  "productName": "Dokumen Kegiatan",
+  "version": "1.3.1",
+  "description": "Dokumen Kegiatan - S2 Magister Manajemen FEB UNJ",
+  "author": "Koorprodi Dr. Osly Usman, M.BusSyst",
+  "main": "src/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8",
+    "playwright-core": "^1.48.2"
+  },
+  "build": {
+    "appId": "id.ac.unj.feb.mm.dokumenkegiatan",
+    "productName": "Dokumen Kegiatan",
+    "copyright": "Koorprodi Dr. Osly Usman, M.BusSyst - S2 Magister Manajemen FEB UNJ",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Dokumen Kegiatan",
+      "artifactName": "Dokumen-Kegiatan-Setup-${version}.exe"
+    },
+    "publish": null
+  }
+}

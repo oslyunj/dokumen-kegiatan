@@ -1,0 +1,11 @@
+node_modules/
+desktop/dist/
+desktop/test/out*/
+desktop/test/*.log
+*.blockmap
+# kredensial dan kunci tidak boleh masuk repositori
+client_secret_*.json
+kredensial-google.json
+token-google.bin
+kunci-gemini.bin
+.env
